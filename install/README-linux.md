@@ -24,6 +24,7 @@ Open terminal in your project directory and run the following commands:
 mkdir -p .codex/hooks
 git clone https://github.com/shanraisshan/codex-cli-voice-hooks.git temp-hooks
 cp -r temp-hooks/.codex/hooks/* .codex/hooks/
+cp temp-hooks/install/hooks-linux.json .codex/hooks.json
 rm -rf temp-hooks
 ```
 
@@ -31,11 +32,6 @@ rm -rf temp-hooks
 
 1. If you don't have a `.codex/config.toml` file in your project, create one: `touch .codex/config.toml`
 2. Open [`install/config-linux.toml`](config-linux.toml) and copy the `notify` line into your `.codex/config.toml`
-
-### Step 3: Copy hooks.json for SessionStart and Stop hooks (v0.114.0+)
-
-1. Copy [`install/hooks-linux.json`](hooks-linux.json) to `.codex/hooks.json` in your project
-2. Run Codex with the hooks feature flag: `codex -c features.codex_hooks=true`
 
 > **Why separate config files per platform?**
 > - Python command: `python3` (macOS/Linux) vs `python` (Windows)

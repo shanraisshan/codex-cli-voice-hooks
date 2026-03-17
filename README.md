@@ -21,18 +21,6 @@
 
 [Codex CLI](https://github.com/openai/codex) fires hooks at key points in the agent lifecycle. This project plays sounds and injects session context, so you stay informed without watching the terminal.
 
-### Hooks
-
-| # | Hook | Event | What It Does |
-|:-:|------|-------|--------------|
-| 1 | `notify` | `agent-turn-complete` | Plays sound when agent finishes |
-| 2 | `SessionStart` | `SessionStart` | Injects context (date, git branch, status) + plays sound |
-| 3 | `Stop` | `stop` | Plays sound when session ends |
-
-> Hooks 2 and 3 require **Codex CLI v0.114.0+** with the hooks engine enabled.
-
-See [HOOKS-README.md](.codex/hooks/HOOKS-README.md) for full documentation on configuration, logging, and audio player details.
-
 ![How to Use](!/how-to-use.svg)
 
 After [installing](#installation) the hooks:
@@ -43,6 +31,14 @@ codex -c features.codex_hooks=true
 ```
 
 **Step 2.** Send a prompt (e.g., `Hi`) — you'll hear a sound on session start, agent response, and session stop.
+
+## Changelog
+new hook addition changelogs only
+
+| Date | Hooks | Changes | Codex CLI Version | Demo |
+|------|:-----:|---------|:-----------------:|:----:|
+| Mar 17, 2026 | 3 | Added `SessionStart` and `Stop` | [v0.115.0](https://github.com/openai/codex/releases) | |
+| Feb 27, 2026 | 1 | Initial release: `agent-turn-complete` | [v0.114.0](https://github.com/openai/codex/releases) | |
 
 ## Links
 
