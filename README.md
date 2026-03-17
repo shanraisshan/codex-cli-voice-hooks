@@ -17,13 +17,7 @@
   <a href="install/README-windows.md"><img src="!/pill-windows.svg" alt="Windows" height="36"></a>
 </p>
 
-## How It Works
-
-[Codex CLI](https://github.com/openai/codex) fires hooks at key points in the agent lifecycle. This project plays sounds and injects session context, so you stay informed without watching the terminal.
-
 ![How to Use](!/how-to-use.svg)
-
-After [installing](#installation) the hooks:
 
 **Step 1.** Start Codex CLI with the hooks engine <img src="!/beta.svg" alt="Beta" height="16"> enabled:
 ```bash
