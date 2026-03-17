@@ -1,5 +1,5 @@
 # Codex CLI Voice Hooks
-[![Hooks](https://img.shields.io/badge/supports-3%20hooks-white?style=flat&labelColor=555)](.codex/hooks/HOOKS-README.md) [![Version](https://img.shields.io/badge/updated%20with%20Codex%20CLI-v0.115.0%20(Mar%2017%2C%202026%205%3A00%20PM%20PKT)-white?style=flat&labelColor=555)](https://github.com/openai/codex/releases) <img src="!/beta.svg" alt="Beta" height="20">
+[![Hooks](https://img.shields.io/badge/supports-3%20hooks-white?style=flat&labelColor=555)](.codex/hooks/HOOKS-README.md) [![Version](https://img.shields.io/badge/updated%20with%20Codex%20CLI-v0.115.0%20(Mar%2017%2C%202026%206%3A30%20PM%20PKT)-white?style=flat&labelColor=555)](https://github.com/openai/codex/releases) <img src="!/beta.svg" alt="Beta" height="20">
 
 <p align="center">
   <img src="!/codex-speaking.svg" alt="Codex CLI mascot speaking" width="176" height="158">
@@ -49,9 +49,8 @@ codex -c features.codex_hooks=true
 <p>
   <a href="#"><img src="!/pill-youtube.svg" alt="YouTube" height="36"></a>&nbsp;
   <a href="#"><img src="!/pill-linkedin.svg" alt="LinkedIn" height="36"></a>&nbsp;
-  <a href="#"><img src="!/pill-reddit.svg" alt="Reddit" height="36"></a>&nbsp;
-  <a href="#"><img src="!/pill-x.svg" alt="X" height="36"></a>&nbsp;
-  <a href="#"><img src="!/pill-medium.svg" alt="Medium" height="36"></a>
+  <a href="https://www.reddit.com/r/codex/comments/1rw6j0o/codex_cli_now_has_hooks_support_beta_sessionstart/"><img src="!/pill-reddit.svg" alt="Reddit" height="36"></a>&nbsp;
+  <a href="https://x.com/shanraisshan/status/2033899318264856925"><img src="!/pill-x.svg" alt="X" height="36"></a>&nbsp;
 </p>
 
 ## Other CLI Voice Hooks

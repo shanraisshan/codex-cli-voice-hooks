@@ -2,5 +2,5 @@
   "disableNotifyHook": false,
   "disableSessionStartHook": false,
   "disableStopHook": false,
-  "disableLogging": false
+  "disableLogging": true
 }
