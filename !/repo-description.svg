@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="580" height="56" viewBox="0 0 580 56">
   <rect width="580" height="56" rx="14" fill="#1a1a2e"/>
-  <text x="290" y="22" text-anchor="middle" fill="#45c9a0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" letter-spacing="0.3">&#x1F50A; Notification on agent-turn-complete  &#xB7;  &#x1F50A; Sound on SessionStart &amp; Stop</text>
-  <text x="290" y="42" text-anchor="middle" fill="#8b8ba0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" letter-spacing="0.3">Context injection (date, git branch) on SessionStart</text>
+  <text x="290" y="22" text-anchor="middle" fill="#45c9a0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" letter-spacing="0.3">&#x1F50A; Human sounds on session start, stop, and agent turn complete</text>
+  <text x="290" y="42" text-anchor="middle" fill="#8b8ba0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="12" letter-spacing="0.3">Pre-recorded human voice on all hooks</text>
 </svg>
