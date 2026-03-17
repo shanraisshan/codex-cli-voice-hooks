@@ -2,14 +2,14 @@
 """
 Codex CLI Hook Handler
 =============================================
-This script handles hooks from Codex CLI and plays notification sounds.
+This script handles hooks from Codex CLI and plays sounds.
 Codex CLI supports 3 hooks:
-  1. notify (event: agent-turn-complete) - via config.toml
+  1. agent-turn-complete - via config.toml (notify)
   2. SessionStart - via hooks.json (v0.114.0+)
   3. Stop - via hooks.json (v0.114.0+)
 
 Input:
-  - notify hook: JSON payload passed as CLI argument (sys.argv[1])
+  - agent-turn-complete hook: JSON payload passed as CLI argument (sys.argv[1])
   - SessionStart/Stop hooks: --hook <hook-name> flag
 """
 
@@ -29,14 +29,14 @@ except ImportError:
 # ===== HOOK EVENT TO SOUND MAPPING =====
 # Sound name -> resolves to sounds/<name>/<name>.{mp3|wav}
 HOOK_SOUND_MAP = {
-    "agent-turn-complete": "notification",
-    "SessionStart": "session-start",
-    "Stop": "stop",
+    "agent-turn-complete": "agent-turn-complete",
+    "SessionStart": "SessionStart",
+    "Stop": "Stop",
 }
 
 # ===== HOOK EVENT TO CONFIG KEY MAPPING =====
 HOOK_CONFIG_MAP = {
-    "agent-turn-complete": "disableNotifyHook",
+    "agent-turn-complete": "disableAgentTurnCompleteHook",
     "SessionStart": "disableSessionStartHook",
     "Stop": "disableStopHook",
 }
@@ -89,7 +89,7 @@ def play_sound(sound_name):
     Play a sound file for the given sound name.
 
     Args:
-        sound_name: Name of the sound file (e.g., "notification")
+        sound_name: Name of the sound file (e.g., "agent-turn-complete")
                    The file should be at .codex/hooks/sounds/{name}/{name}.{mp3|wav}
 
     Returns:
@@ -213,7 +213,7 @@ def is_hook_disabled(event_name):
     Returns:
         True if the hook is disabled, False otherwise
     """
-    config_key = HOOK_CONFIG_MAP.get(event_name, "disableNotifyHook")
+    config_key = HOOK_CONFIG_MAP.get(event_name, "disableAgentTurnCompleteHook")
     return get_config_value(config_key, default=False)
 
 
@@ -273,7 +273,7 @@ def parse_args(argv):
     """
     Parse command line arguments.
     Supports two calling conventions:
-      1. notify hook (config.toml): hooks.py '{"type":"agent-turn-complete"}'
+      1. agent-turn-complete hook (config.toml): hooks.py '{"type":"agent-turn-complete"}'
       2. SessionStart/Stop hooks (hooks.json): hooks.py --hook SessionStart
 
     Args:
@@ -301,7 +301,7 @@ def parse_args(argv):
             pass
         return event_type, input_data
 
-    # Legacy notify hook: JSON as CLI argument
+    # agent-turn-complete hook: JSON as CLI argument
     try:
         input_data = json.loads(argv[0])
         event_type = input_data.get("type", "")
@@ -316,7 +316,7 @@ def main():
     Main program - runs when Codex CLI triggers a hook.
 
     Supports 3 hooks:
-    1. notify (config.toml): Plays sound on agent-turn-complete
+    1. agent-turn-complete (config.toml): Plays sound on agent-turn-complete
     2. SessionStart (hooks.json): Outputs context to stdout + plays sound
     3. Stop (hooks.json): Plays sound on session end
     """

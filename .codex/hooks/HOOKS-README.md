@@ -7,9 +7,9 @@ Codex CLI provides **3 hooks** across two configuration systems:
 
 | # | Hook | Event Type | Config File | Description |
 |:-:|------|------------|-------------|-------------|
-| 1 | `notify` | `agent-turn-complete` | `config.toml` | Runs when the Codex agent finishes responding |
-| 2 | `SessionStart` | `session-start` | `hooks.json` | Runs once at session start — injects context + plays sound |
-| 3 | `Stop` | `session-stop` | `hooks.json` | Runs when the session ends — plays sound |
+| 1 | `agent-turn-complete` | `agent-turn-complete` | `config.toml` | Runs when the Codex agent finishes responding |
+| 2 | `SessionStart` | `SessionStart` | `hooks.json` | Runs once at session start — injects context + plays sound |
+| 3 | `Stop` | `stop` | `hooks.json` | Runs when the session ends — plays sound |
 
 > Hooks 2 and 3 require **Codex CLI v0.114.0+** with the hooks engine enabled:
 > ```bash
@@ -18,15 +18,15 @@ Codex CLI provides **3 hooks** across two configuration systems:
 
 ### How Hooks Are Called
 
-**notify hook** (config.toml) — JSON passed as CLI argument:
+**agent-turn-complete hook** (config.toml) — JSON passed as CLI argument:
 ```
 python3 .codex/hooks/scripts/hooks.py '{"type":"agent-turn-complete"}'
 ```
 
 **SessionStart / Stop hooks** (hooks.json) — called with `--hook` flag:
 ```
-python3 .codex/hooks/scripts/hooks.py --hook session-start
-python3 .codex/hooks/scripts/hooks.py --hook session-stop
+python3 .codex/hooks/scripts/hooks.py --hook SessionStart
+python3 .codex/hooks/scripts/hooks.py --hook Stop
 ```
 
 ### SessionStart Context Injection
@@ -66,11 +66,11 @@ The hook script automatically detects and uses the appropriate audio player for 
 
 There are **three** configuration files:
 
-1. **`.codex/config.toml`** — Registers the `notify` hook
+1. **`.codex/config.toml`** — Registers the `agent-turn-complete` hook (via `notify`)
 2. **`.codex/hooks.json`** — Registers `SessionStart` and `Stop` hooks (v0.114.0+)
 3. **`.codex/hooks/config/hooks-config.json`** — Enable/disable individual hooks and logging
 
-#### config.toml (notify hook)
+#### config.toml (agent-turn-complete hook)
 
 ```toml
 notify = ["python3", ".codex/hooks/scripts/hooks.py"]
@@ -84,7 +84,7 @@ notify = ["python3", ".codex/hooks/scripts/hooks.py"]
     "SessionStart": [
       {
         "type": "shell",
-        "command": "python3 .codex/hooks/scripts/hooks.py --hook session-start",
+        "command": "python3 .codex/hooks/scripts/hooks.py --hook SessionStart",
         "statusMessage": "Initializing session hooks...",
         "timeout": 10
       }
@@ -92,7 +92,7 @@ notify = ["python3", ".codex/hooks/scripts/hooks.py"]
     "Stop": [
       {
         "type": "shell",
-        "command": "python3 .codex/hooks/scripts/hooks.py --hook session-stop",
+        "command": "python3 .codex/hooks/scripts/hooks.py --hook Stop",
         "statusMessage": "Running session stop hook...",
         "timeout": 10
       }
@@ -108,7 +108,7 @@ notify = ["python3", ".codex/hooks/scripts/hooks.py"]
 Edit `.codex/hooks/config/hooks-config.json`:
 ```json
 {
-  "disableNotifyHook": false,
+  "disableAgentTurnCompleteHook": false,
   "disableSessionStartHook": false,
   "disableStopHook": false,
   "disableLogging": true
@@ -116,9 +116,9 @@ Edit `.codex/hooks/config/hooks-config.json`:
 ```
 
 **Configuration Options:**
-- `disableNotifyHook`: Set to `true` to disable the agent-turn-complete notification sound
+- `disableAgentTurnCompleteHook`: Set to `true` to disable the agent-turn-complete sound
 - `disableSessionStartHook`: Set to `true` to disable the session start context injection and sound
-- `disableStopHook`: Set to `true` to disable the session stop notification sound
+- `disableStopHook`: Set to `true` to disable the session stop sound
 - `disableLogging`: Set to `true` to disable logging hook events to `.codex/hooks/logs/hooks-log.jsonl`
 
 ### Configuration Fallback
@@ -136,7 +136,7 @@ Create or edit `.codex/hooks/config/hooks-config.local.json` for personal prefer
 
 ```json
 {
-  "disableNotifyHook": true,
+  "disableAgentTurnCompleteHook": true,
   "disableSessionStartHook": false,
   "disableStopHook": true,
   "disableLogging": true

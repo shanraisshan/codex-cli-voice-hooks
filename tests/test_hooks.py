@@ -2,7 +2,7 @@
 """
 Tests for Codex CLI Hook Handler
 =================================
-Tests all 3 hooks: notify, SessionStart, and Stop.
+Tests all 3 hooks: agent-turn-complete, SessionStart, and Stop.
 Run with: python3 -m pytest tests/test_hooks.py -v
 """
 
@@ -27,8 +27,8 @@ class TestParseArgs(unittest.TestCase):
         self.assertIsNone(event_type)
         self.assertIsNone(input_data)
 
-    def test_notify_hook_json_arg(self):
-        """Legacy notify hook: JSON as CLI argument."""
+    def test_agent_turn_complete_hook_json_arg(self):
+        """agent-turn-complete hook: JSON as CLI argument."""
         event_type, input_data = hooks.parse_args(['{"type":"agent-turn-complete"}'])
         self.assertEqual(event_type, "agent-turn-complete")
         self.assertEqual(input_data, {"type": "agent-turn-complete"})
@@ -78,7 +78,7 @@ class TestHookConfigMap(unittest.TestCase):
     """Test that all hook events have config key mappings."""
 
     def test_agent_turn_complete_config_key(self):
-        self.assertEqual(hooks.HOOK_CONFIG_MAP["agent-turn-complete"], "disableNotifyHook")
+        self.assertEqual(hooks.HOOK_CONFIG_MAP["agent-turn-complete"], "disableAgentTurnCompleteHook")
 
     def test_session_start_config_key(self):
         self.assertEqual(hooks.HOOK_CONFIG_MAP["SessionStart"], "disableSessionStartHook")
@@ -104,8 +104,8 @@ class TestIsHookDisabled(unittest.TestCase):
         self.assertFalse(hooks.is_hook_disabled("Stop"))
 
     @patch("hooks.load_config")
-    def test_notify_hook_disabled_in_default_config(self, mock_load):
-        mock_load.return_value = (None, {"disableNotifyHook": True})
+    def test_agent_turn_complete_hook_disabled_in_default_config(self, mock_load):
+        mock_load.return_value = (None, {"disableAgentTurnCompleteHook": True})
         self.assertTrue(hooks.is_hook_disabled("agent-turn-complete"))
 
     @patch("hooks.load_config")
@@ -121,8 +121,8 @@ class TestIsHookDisabled(unittest.TestCase):
     @patch("hooks.load_config")
     def test_local_config_overrides_default(self, mock_load):
         mock_load.return_value = (
-            {"disableNotifyHook": True},
-            {"disableNotifyHook": False},
+            {"disableAgentTurnCompleteHook": True},
+            {"disableAgentTurnCompleteHook": False},
         )
         self.assertTrue(hooks.is_hook_disabled("agent-turn-complete"))
 
@@ -183,7 +183,7 @@ class TestPlaySound(unittest.TestCase):
 
     @patch("hooks.get_audio_player", return_value=None)
     def test_no_audio_player(self, _):
-        self.assertFalse(hooks.play_sound("notification"))
+        self.assertFalse(hooks.play_sound("agent-turn-complete"))
 
 
 class TestLogHookData(unittest.TestCase):
@@ -220,12 +220,12 @@ class TestMainIntegration(unittest.TestCase):
     @patch("hooks.play_sound", return_value=True)
     @patch("hooks.is_hook_disabled", return_value=False)
     @patch("hooks.log_hook_data")
-    def test_notify_hook_plays_sound(self, mock_log, mock_disabled, mock_play):
+    def test_agent_turn_complete_hook_plays_sound(self, mock_log, mock_disabled, mock_play):
         with patch("sys.argv", ["hooks.py", '{"type":"agent-turn-complete"}']):
             with self.assertRaises(SystemExit) as ctx:
                 hooks.main()
             self.assertEqual(ctx.exception.code, 0)
-            mock_play.assert_called_once_with("notification")
+            mock_play.assert_called_once_with("agent-turn-complete")
 
     @patch("hooks.play_sound", return_value=True)
     @patch("hooks.is_hook_disabled", return_value=False)
@@ -239,7 +239,7 @@ class TestMainIntegration(unittest.TestCase):
                 hooks.main()
             self.assertEqual(ctx.exception.code, 0)
             mock_context.assert_called_once()
-            mock_play.assert_called_once_with("session-start")
+            mock_play.assert_called_once_with("SessionStart")
 
     @patch("hooks.play_sound", return_value=True)
     @patch("hooks.is_hook_disabled", return_value=False)
@@ -249,7 +249,7 @@ class TestMainIntegration(unittest.TestCase):
             with self.assertRaises(SystemExit) as ctx:
                 hooks.main()
             self.assertEqual(ctx.exception.code, 0)
-            mock_play.assert_called_once_with("stop")
+            mock_play.assert_called_once_with("Stop")
 
     @patch("hooks.play_sound")
     @patch("hooks.is_hook_disabled", return_value=True)

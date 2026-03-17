@@ -1,5 +1,5 @@
 {
-  "disableNotifyHook": false,
+  "disableAgentTurnCompleteHook": false,
   "disableSessionStartHook": false,
   "disableStopHook": false,
   "disableLogging": true
