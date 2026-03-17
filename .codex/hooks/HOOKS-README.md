@@ -1,25 +1,43 @@
 # HOOKS-README
-Contains all the details, scripts, and instructions for the Codex CLI notify hook.
+Contains all the details, scripts, and instructions for the Codex CLI hooks.
 
 ## Hook Events Overview
 
-Codex CLI provides **1 hook** that runs when the agent completes a turn:
+Codex CLI provides **3 hooks** across two configuration systems:
 
-| # | Hook | Event Type | Description |
-|:-:|------|------------|-------------|
-| 1 | `notify` | `agent-turn-complete` | Runs when the Codex agent finishes responding |
+| # | Hook | Event Type | Config File | Description |
+|:-:|------|------------|-------------|-------------|
+| 1 | `notify` | `agent-turn-complete` | `config.toml` | Runs when the Codex agent finishes responding |
+| 2 | `SessionStart` | `session-start` | `hooks.json` | Runs once at session start — injects context + plays sound |
+| 3 | `Stop` | `session-stop` | `hooks.json` | Runs when the session ends — plays sound |
 
-### JSON Payload Structure
+> Hooks 2 and 3 require **Codex CLI v0.114.0+** with the hooks engine enabled:
+> ```bash
+> codex -c features.codex_hooks=true
+> ```
 
-Codex CLI passes a JSON payload as a **CLI argument** (`sys.argv[1]`) to the hook script:
+### How Hooks Are Called
 
-```json
-{
-  "type": "agent-turn-complete"
-}
+**notify hook** (config.toml) — JSON passed as CLI argument:
+```
+python3 .codex/hooks/scripts/hooks.py '{"type":"agent-turn-complete"}'
 ```
 
-> **Key difference from Claude Code:** Claude Code passes JSON via **stdin**, while Codex CLI passes it as a **CLI argument**.
+**SessionStart / Stop hooks** (hooks.json) — called with `--hook` flag:
+```
+python3 .codex/hooks/scripts/hooks.py --hook session-start
+python3 .codex/hooks/scripts/hooks.py --hook session-stop
+```
+
+### SessionStart Context Injection
+
+The SessionStart hook outputs context to **stdout**, which feeds directly into the model's context window. This includes:
+- Current date/time
+- Git branch name
+- Working tree status (clean or uncommitted changes)
+- Working directory path
+
+> **Key difference from Claude Code:** Claude Code passes JSON via **stdin**, while Codex CLI passes it as a **CLI argument**. The new hooks.json system uses `--hook` flags.
 
 ## Prerequisites
 
@@ -44,32 +62,66 @@ The hook script automatically detects and uses the appropriate audio player for 
 - **Linux**: Uses `paplay` from `pulseaudio-utils` - install via `sudo apt install pulseaudio-utils`
 - **Windows**: Uses built-in `winsound` module (included with Python)
 
-### How the Hook Is Executed
+### Configuration Files
 
-The hook is configured in `.codex/config.toml`:
+There are **three** configuration files:
+
+1. **`.codex/config.toml`** — Registers the `notify` hook
+2. **`.codex/hooks.json`** — Registers `SessionStart` and `Stop` hooks (v0.114.0+)
+3. **`.codex/hooks/config/hooks-config.json`** — Enable/disable individual hooks and logging
+
+#### config.toml (notify hook)
 
 ```toml
 notify = ["python3", ".codex/hooks/scripts/hooks.py"]
 ```
 
-When the agent completes a turn, Codex CLI runs:
-```
-python3 .codex/hooks/scripts/hooks.py '{"type":"agent-turn-complete"}'
+#### hooks.json (SessionStart + Stop hooks)
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "shell",
+        "command": "python3 .codex/hooks/scripts/hooks.py --hook session-start",
+        "statusMessage": "Initializing session hooks...",
+        "timeout": 10
+      }
+    ],
+    "Stop": [
+      {
+        "type": "shell",
+        "command": "python3 .codex/hooks/scripts/hooks.py --hook session-stop",
+        "statusMessage": "Running session stop hook...",
+        "timeout": 10
+      }
+    ]
+  }
+}
 ```
 
-## Configuring the Hook (Enable/Disable)
+## Configuring Hooks (Enable/Disable)
 
-### Disable the Notify Hook
+### Disable Individual Hooks
 
 Edit `.codex/hooks/config/hooks-config.json`:
 ```json
 {
-  "disableNotifyHook": true,
+  "disableNotifyHook": false,
+  "disableSessionStartHook": false,
+  "disableStopHook": false,
   "disableLogging": true
 }
 ```
 
-### Configuration Files
+**Configuration Options:**
+- `disableNotifyHook`: Set to `true` to disable the agent-turn-complete notification sound
+- `disableSessionStartHook`: Set to `true` to disable the session start context injection and sound
+- `disableStopHook`: Set to `true` to disable the session stop notification sound
+- `disableLogging`: Set to `true` to disable logging hook events to `.codex/hooks/logs/hooks-log.jsonl`
+
+### Configuration Fallback
 
 There are two configuration files:
 
@@ -78,21 +130,6 @@ There are two configuration files:
 
 The local config file (`.local.json`) takes precedence over the shared config, allowing each developer to customize their hook behavior without affecting the team.
 
-#### Shared Configuration
-
-Edit `.codex/hooks/config/hooks-config.json` for team-wide defaults:
-
-```json
-{
-  "disableNotifyHook": false,
-  "disableLogging": true
-}
-```
-
-**Configuration Options:**
-- `disableNotifyHook`: Set to `true` to disable the notification sound
-- `disableLogging`: Set to `true` to disable logging hook events to `.codex/hooks/logs/hooks-log.jsonl`
-
 #### Local Configuration (Personal Overrides)
 
 Create or edit `.codex/hooks/config/hooks-config.local.json` for personal preferences:
@@ -100,20 +137,28 @@ Create or edit `.codex/hooks/config/hooks-config.local.json` for personal prefer
 ```json
 {
   "disableNotifyHook": true,
+  "disableSessionStartHook": false,
+  "disableStopHook": true,
   "disableLogging": true
 }
 ```
-
-In this example, both the notification sound and logging are disabled locally. The shared configuration values are used for any keys not present in the local config.
 
 ### Logging
 
 When logging is enabled (`"disableLogging": false`), hook events are logged to `.codex/hooks/logs/hooks-log.jsonl` in JSON Lines format. Each entry contains the full JSON payload received from Codex CLI.
 
+## Testing
+
+Run the test suite:
+```bash
+python3 -m unittest tests.test_hooks -v
+```
+
 ## Future Extensibility
 
-Codex CLI currently supports only the `notify` hook with the `agent-turn-complete` event. If OpenAI adds more hooks in the future, this project can be extended by:
+This project can be extended by:
 
 1. Adding new entries to `HOOK_SOUND_MAP` in `hooks.py`
 2. Adding corresponding sound files in `.codex/hooks/sounds/`
 3. Adding toggle keys in `hooks-config.json`
+4. Adding new hook entries in `hooks.json`

@@ -40,5 +40,10 @@ rmdir /S /Q temp-hooks
 1. If you don't have a `.codex/config.toml` file in your project, create one: `New-Item -Force .codex/config.toml`
 2. Open [`install/config-windows.toml`](config-windows.toml) and copy the `notify` line into your `.codex/config.toml`
 
+### Step 3: Copy hooks.json for SessionStart and Stop hooks (v0.114.0+)
+
+1. Copy [`install/hooks-windows.json`](hooks-windows.json) to `.codex/hooks.json` in your project
+2. Run Codex with the hooks feature flag: `codex -c features.codex_hooks=true`
+
 > **Why separate config files per platform?**
 > - Python command: `python3` (macOS/Linux) vs `python` (Windows)

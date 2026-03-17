@@ -1,4 +1,6 @@
 {
   "disableNotifyHook": false,
-  "disableLogging": true
+  "disableSessionStartHook": false,
+  "disableStopHook": false,
+  "disableLogging": false
 }

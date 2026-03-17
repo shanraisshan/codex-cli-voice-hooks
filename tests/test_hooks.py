@@ -1,0 +1,289 @@
+#!/usr/bin/env python3
+"""
+Tests for Codex CLI Hook Handler
+=================================
+Tests all 3 hooks: notify, SessionStart, and Stop.
+Run with: python3 -m pytest tests/test_hooks.py -v
+"""
+
+import sys
+import os
+import json
+import tempfile
+import unittest
+from unittest.mock import patch, MagicMock
+from pathlib import Path
+
+# Add the scripts directory to the path
+sys.path.insert(0, str(Path(__file__).parent.parent / ".codex" / "hooks" / "scripts"))
+import hooks
+
+
+class TestParseArgs(unittest.TestCase):
+    """Test argument parsing for both calling conventions."""
+
+    def test_empty_args(self):
+        event_type, input_data = hooks.parse_args([])
+        self.assertIsNone(event_type)
+        self.assertIsNone(input_data)
+
+    def test_notify_hook_json_arg(self):
+        """Legacy notify hook: JSON as CLI argument."""
+        event_type, input_data = hooks.parse_args(['{"type":"agent-turn-complete"}'])
+        self.assertEqual(event_type, "agent-turn-complete")
+        self.assertEqual(input_data, {"type": "agent-turn-complete"})
+
+    def test_session_start_hook_flag(self):
+        """New hooks.json: --hook session-start."""
+        event_type, input_data = hooks.parse_args(["--hook", "session-start"])
+        self.assertEqual(event_type, "session-start")
+        self.assertEqual(input_data, {"type": "session-start"})
+
+    def test_session_stop_hook_flag(self):
+        """New hooks.json: --hook session-stop."""
+        event_type, input_data = hooks.parse_args(["--hook", "session-stop"])
+        self.assertEqual(event_type, "session-stop")
+        self.assertEqual(input_data, {"type": "session-stop"})
+
+    def test_hook_flag_missing_value(self):
+        """--hook without a value should return None."""
+        event_type, input_data = hooks.parse_args(["--hook"])
+        self.assertIsNone(event_type)
+        self.assertIsNone(input_data)
+
+    def test_invalid_json(self):
+        """Invalid JSON should return None gracefully."""
+        event_type, input_data = hooks.parse_args(["not-json"])
+        self.assertIsNone(event_type)
+        self.assertIsNone(input_data)
+
+
+class TestHookSoundMap(unittest.TestCase):
+    """Test that all hook events have sound mappings."""
+
+    def test_agent_turn_complete_mapping(self):
+        self.assertIn("agent-turn-complete", hooks.HOOK_SOUND_MAP)
+
+    def test_session_start_mapping(self):
+        self.assertIn("session-start", hooks.HOOK_SOUND_MAP)
+
+    def test_session_stop_mapping(self):
+        self.assertIn("session-stop", hooks.HOOK_SOUND_MAP)
+
+    def test_unknown_event_no_mapping(self):
+        self.assertNotIn("unknown-event", hooks.HOOK_SOUND_MAP)
+
+
+class TestHookConfigMap(unittest.TestCase):
+    """Test that all hook events have config key mappings."""
+
+    def test_agent_turn_complete_config_key(self):
+        self.assertEqual(hooks.HOOK_CONFIG_MAP["agent-turn-complete"], "disableNotifyHook")
+
+    def test_session_start_config_key(self):
+        self.assertEqual(hooks.HOOK_CONFIG_MAP["session-start"], "disableSessionStartHook")
+
+    def test_session_stop_config_key(self):
+        self.assertEqual(hooks.HOOK_CONFIG_MAP["session-stop"], "disableStopHook")
+
+
+class TestIsHookDisabled(unittest.TestCase):
+    """Test hook disable/enable logic with config files."""
+
+    def _create_config(self, config_dir, filename, data):
+        path = config_dir / filename
+        with open(path, "w") as f:
+            json.dump(data, f)
+        return path
+
+    @patch("hooks.load_config")
+    def test_hook_enabled_by_default(self, mock_load):
+        mock_load.return_value = (None, None)
+        self.assertFalse(hooks.is_hook_disabled("agent-turn-complete"))
+        self.assertFalse(hooks.is_hook_disabled("session-start"))
+        self.assertFalse(hooks.is_hook_disabled("session-stop"))
+
+    @patch("hooks.load_config")
+    def test_notify_hook_disabled_in_default_config(self, mock_load):
+        mock_load.return_value = (None, {"disableNotifyHook": True})
+        self.assertTrue(hooks.is_hook_disabled("agent-turn-complete"))
+
+    @patch("hooks.load_config")
+    def test_session_start_disabled_in_default_config(self, mock_load):
+        mock_load.return_value = (None, {"disableSessionStartHook": True})
+        self.assertTrue(hooks.is_hook_disabled("session-start"))
+
+    @patch("hooks.load_config")
+    def test_session_stop_disabled_in_default_config(self, mock_load):
+        mock_load.return_value = (None, {"disableStopHook": True})
+        self.assertTrue(hooks.is_hook_disabled("session-stop"))
+
+    @patch("hooks.load_config")
+    def test_local_config_overrides_default(self, mock_load):
+        mock_load.return_value = (
+            {"disableNotifyHook": True},
+            {"disableNotifyHook": False},
+        )
+        self.assertTrue(hooks.is_hook_disabled("agent-turn-complete"))
+
+    @patch("hooks.load_config")
+    def test_local_config_enables_when_default_disables(self, mock_load):
+        mock_load.return_value = (
+            {"disableSessionStartHook": False},
+            {"disableSessionStartHook": True},
+        )
+        self.assertFalse(hooks.is_hook_disabled("session-start"))
+
+
+class TestIsLoggingDisabled(unittest.TestCase):
+    """Test logging disable/enable logic."""
+
+    @patch("hooks.get_config_value")
+    def test_logging_disabled(self, mock_config):
+        mock_config.return_value = True
+        self.assertTrue(hooks.is_logging_disabled())
+
+    @patch("hooks.get_config_value")
+    def test_logging_enabled(self, mock_config):
+        mock_config.return_value = False
+        self.assertFalse(hooks.is_logging_disabled())
+
+
+class TestGetSessionContext(unittest.TestCase):
+    """Test SessionStart context generation."""
+
+    @patch("hooks.subprocess.run")
+    def test_context_includes_date(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="")
+        context = hooks.get_session_context()
+        self.assertIn("Date:", context)
+
+    @patch("hooks.subprocess.run")
+    def test_context_includes_git_branch(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0, stdout="main\n")
+        context = hooks.get_session_context()
+        self.assertIn("Git branch: main", context)
+
+    @patch("hooks.subprocess.run")
+    def test_context_includes_working_directory(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="")
+        context = hooks.get_session_context()
+        self.assertIn("Working directory:", context)
+
+
+class TestGetAudioPlayer(unittest.TestCase):
+    """Test audio player detection."""
+
+    @patch("hooks.platform.system", return_value="Darwin")
+    def test_macos_player(self, _):
+        self.assertEqual(hooks.get_audio_player(), ["afplay"])
+
+    @patch("hooks.platform.system", return_value="Windows")
+    def test_windows_player(self, _):
+        self.assertEqual(hooks.get_audio_player(), ["WINDOWS"])
+
+    @patch("hooks.platform.system", return_value="UnknownOS")
+    def test_unknown_os_returns_none(self, _):
+        self.assertIsNone(hooks.get_audio_player())
+
+
+class TestPlaySound(unittest.TestCase):
+    """Test sound playback."""
+
+    def test_directory_traversal_blocked(self):
+        self.assertFalse(hooks.play_sound("../etc/passwd"))
+        self.assertFalse(hooks.play_sound("sound/../../etc"))
+        self.assertFalse(hooks.play_sound("..\\windows\\system32"))
+
+    @patch("hooks.get_audio_player", return_value=None)
+    def test_no_audio_player(self, _):
+        self.assertFalse(hooks.play_sound("notification"))
+
+
+class TestLogHookData(unittest.TestCase):
+    """Test hook data logging."""
+
+    @patch("hooks.is_logging_disabled", return_value=True)
+    def test_logging_skipped_when_disabled(self, _):
+        # Should not raise or write anything
+        hooks.log_hook_data({"type": "test"})
+
+    @patch("hooks.is_logging_disabled", return_value=False)
+    def test_logging_writes_jsonl(self, _):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            logs_dir = Path(tmpdir)
+            log_path = logs_dir / "hooks-log.jsonl"
+
+            with patch.object(Path, "parent", new_callable=lambda: property(lambda self: Path(tmpdir))):
+                # Patch the file path resolution to use temp dir
+                original_log = hooks.log_hook_data
+
+                def patched_log(hook_data):
+                    with open(log_path, "a", encoding="utf-8") as f:
+                        f.write(json.dumps(hook_data, ensure_ascii=False, indent=2) + "\n")
+
+                patched_log({"type": "session-start"})
+                self.assertTrue(log_path.exists())
+                content = log_path.read_text()
+                self.assertIn("session-start", content)
+
+
+class TestMainIntegration(unittest.TestCase):
+    """Integration tests for main() with different hook types."""
+
+    @patch("hooks.play_sound", return_value=True)
+    @patch("hooks.is_hook_disabled", return_value=False)
+    @patch("hooks.log_hook_data")
+    def test_notify_hook_plays_sound(self, mock_log, mock_disabled, mock_play):
+        with patch("sys.argv", ["hooks.py", '{"type":"agent-turn-complete"}']):
+            with self.assertRaises(SystemExit) as ctx:
+                hooks.main()
+            self.assertEqual(ctx.exception.code, 0)
+            mock_play.assert_called_once_with("notification")
+
+    @patch("hooks.play_sound", return_value=True)
+    @patch("hooks.is_hook_disabled", return_value=False)
+    @patch("hooks.log_hook_data")
+    @patch("hooks.get_session_context", return_value="Date: 2026-03-17\nGit branch: main")
+    def test_session_start_outputs_context_and_plays_sound(
+        self, mock_context, mock_log, mock_disabled, mock_play
+    ):
+        with patch("sys.argv", ["hooks.py", "--hook", "session-start"]):
+            with self.assertRaises(SystemExit) as ctx:
+                hooks.main()
+            self.assertEqual(ctx.exception.code, 0)
+            mock_context.assert_called_once()
+            mock_play.assert_called_once_with("session-start")
+
+    @patch("hooks.play_sound", return_value=True)
+    @patch("hooks.is_hook_disabled", return_value=False)
+    @patch("hooks.log_hook_data")
+    def test_session_stop_plays_sound(self, mock_log, mock_disabled, mock_play):
+        with patch("sys.argv", ["hooks.py", "--hook", "session-stop"]):
+            with self.assertRaises(SystemExit) as ctx:
+                hooks.main()
+            self.assertEqual(ctx.exception.code, 0)
+            mock_play.assert_called_once_with("stop")
+
+    @patch("hooks.play_sound")
+    @patch("hooks.is_hook_disabled", return_value=True)
+    @patch("hooks.log_hook_data")
+    def test_disabled_hook_skips_sound(self, mock_log, mock_disabled, mock_play):
+        with patch("sys.argv", ["hooks.py", "--hook", "session-start"]):
+            with self.assertRaises(SystemExit) as ctx:
+                hooks.main()
+            self.assertEqual(ctx.exception.code, 0)
+            mock_play.assert_not_called()
+
+    @patch("hooks.play_sound")
+    @patch("hooks.log_hook_data")
+    def test_no_args_exits_cleanly(self, mock_log, mock_play):
+        with patch("sys.argv", ["hooks.py"]):
+            with self.assertRaises(SystemExit) as ctx:
+                hooks.main()
+            self.assertEqual(ctx.exception.code, 0)
+            mock_play.assert_not_called()
+
+
+if __name__ == "__main__":
+    unittest.main()

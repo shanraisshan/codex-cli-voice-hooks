@@ -1,16 +1,12 @@
 # Codex CLI Voice Hooks
-[![Hooks](https://img.shields.io/badge/supports-1%20hook-white?style=flat&labelColor=555)](.codex/hooks/HOOKS-README.md) [![Version](https://img.shields.io/badge/updated%20with%20Codex%20CLI-v0.106.0%20(Feb%2028%2C%202026%2011%3A32%20AM%20PKT)-white?style=flat&labelColor=555)](https://github.com/openai/codex/releases)
+[![Hooks](https://img.shields.io/badge/supports-3%20hooks-white?style=flat&labelColor=555)](.codex/hooks/HOOKS-README.md) [![Version](https://img.shields.io/badge/updated%20with%20Codex%20CLI-v0.115.0%20(Mar%2017%2C%202026%205%3A00%20PM%20PKT)-white?style=flat&labelColor=555)](https://github.com/openai/codex/releases) <img src="!/beta.svg" alt="Beta" height="20">
 
 <p align="center">
   <img src="!/codex-speaking.svg" alt="Codex CLI mascot speaking" width="176" height="158">
 </p>
 
 <p align="center">
-  <img src="!/ding.svg" alt="Notification on agent turn complete" height="48">
-</p>
-
-<p align="center">
-  <img src="!/tagline.svg" alt="Voice notification for agent-turn-complete events" height="40">
+  <img src="!/repo-description.svg" alt="Notification on agent-turn-complete, sound on SessionStart and Stop, context injection" height="56">
 </p>
 
 ## Installation
@@ -23,19 +19,27 @@
 
 ## How It Works
 
-[Codex CLI](https://github.com/openai/codex) supports a `notify` hook that fires when the agent completes a turn. This project plays a notification sound when that happens, so you know when Codex is done — without watching the terminal.
+[Codex CLI](https://github.com/openai/codex) fires hooks at key points in the agent lifecycle. This project plays notification sounds and injects session context, so you stay informed without watching the terminal.
 
-1. Codex CLI fires the `notify` hook with a JSON payload: `{"type": "agent-turn-complete"}`
-2. The hook script (Python) receives the payload as a CLI argument
-3. The script detects your OS and plays the notification sound using the native audio player
+### Hooks
 
-### Hook
+| # | Hook | Event | What It Does |
+|:-:|------|-------|--------------|
+| 1 | `notify` | `agent-turn-complete` | Plays notification sound when agent finishes |
+| 2 | `SessionStart` | `session-start` | Injects context (date, git branch, status) + plays sound |
+| 3 | `Stop` | `session-stop` | Plays notification sound when session ends |
 
-| # | Hook | Event | Sound |
-|:-:|------|-------|-------|
-| 1 | `notify` | `agent-turn-complete` | `codex-notification.mp3` |
+> Hooks 2 and 3 require **Codex CLI v0.114.0+** with the hooks engine enabled.
 
 See [HOOKS-README.md](.codex/hooks/HOOKS-README.md) for full documentation on configuration, logging, and audio player details.
+
+![How to Use](!/how-to-use.svg)
+
+After [installing](#installation) the hooks, start Codex CLI with the hooks engine <img src="!/beta.svg" alt="Beta" height="16"> enabled:
+
+```bash
+codex -c features.codex_hooks=true
+```
 
 ## Links
 
@@ -49,5 +53,4 @@ See [HOOKS-README.md](.codex/hooks/HOOKS-README.md) for full documentation on co
 
 ## Other CLI Voice Hooks
 
-- [Claude Code Voice Hooks](https://github.com/shanraisshan/claude-code-voice-hooks)
-- [Codex CLI Voice Hooks](https://github.com/shanraisshan/codex-cli-voice-hooks)
+<p><a href="https://github.com/shanraisshan/claude-code-voice-hooks"><img src="https://raw.githubusercontent.com/shanraisshan/claude-code-voice-hooks/main/!/claude-speaking.svg" alt="Claude Code mascot" width="50" height="45" align="middle"></a>&nbsp;&nbsp;<a href="https://github.com/shanraisshan/claude-code-voice-hooks"><b><ins>claude-code-voice-hooks</ins></b></a></p>
