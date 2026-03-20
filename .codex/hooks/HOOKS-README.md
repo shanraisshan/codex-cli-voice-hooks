@@ -3,30 +3,27 @@ Contains all the details, scripts, and instructions for the Codex CLI hooks.
 
 ## Hook Events Overview
 
-Codex CLI provides **3 hooks** across two configuration systems:
+Codex CLI provides **3 hooks** via hooks.json:
 
 | # | Hook | Event Type | Config File | Description |
 |:-:|------|------------|-------------|-------------|
-| 1 | `agent-turn-complete` | `agent-turn-complete` | `config.toml` | Runs when the Codex agent finishes responding |
-| 2 | `SessionStart` | `SessionStart` | `hooks.json` | Runs once at session start — injects context + plays sound |
-| 3 | `Stop` | `stop` | `hooks.json` | Runs when the session ends — plays sound |
+| 1 | `SessionStart` | `SessionStart` | `hooks.json` | Runs once at session start — injects context + plays sound |
+| 2 | `Stop` | `stop` | `hooks.json` | Runs when the session ends — plays sound |
+| 3 | `UserPromptSubmit` | `UserPromptSubmit` | `hooks.json` | Runs when the user submits a prompt — plays sound |
 
-> Hooks 2 and 3 require **Codex CLI v0.114.0+** with the hooks engine enabled:
+> Hooks 1 and 2 require **Codex CLI v0.114.0+** with the hooks engine enabled.
+> Hook 3 requires **Codex CLI v0.116.0+** with the hooks engine enabled:
 > ```bash
 > codex -c features.codex_hooks=true
 > ```
 
 ### How Hooks Are Called
 
-**agent-turn-complete hook** (config.toml) — JSON passed as CLI argument:
-```
-python3 .codex/hooks/scripts/hooks.py '{"type":"agent-turn-complete"}'
-```
-
-**SessionStart / Stop hooks** (hooks.json) — called with `--hook` flag:
+All hooks (hooks.json) are called with `--hook` flag:
 ```
 python3 .codex/hooks/scripts/hooks.py --hook SessionStart
 python3 .codex/hooks/scripts/hooks.py --hook Stop
+python3 .codex/hooks/scripts/hooks.py --hook UserPromptSubmit
 ```
 
 ### SessionStart Context Injection
@@ -36,8 +33,6 @@ The SessionStart hook outputs context to **stdout**, which feeds directly into t
 - Git branch name
 - Working tree status (clean or uncommitted changes)
 - Working directory path
-
-> **Key difference from Claude Code:** Claude Code passes JSON via **stdin**, while Codex CLI passes it as a **CLI argument**. The new hooks.json system uses `--hook` flags.
 
 ## Prerequisites
 
@@ -64,19 +59,12 @@ The hook script automatically detects and uses the appropriate audio player for 
 
 ### Configuration Files
 
-There are **three** configuration files:
+There are **two** configuration files:
 
-1. **`.codex/config.toml`** — Registers the `agent-turn-complete` hook (via `notify`)
-2. **`.codex/hooks.json`** — Registers `SessionStart` and `Stop` hooks (v0.114.0+)
-3. **`.codex/hooks/config/hooks-config.json`** — Enable/disable individual hooks and logging
+1. **`.codex/hooks.json`** — Registers `SessionStart`, `Stop`, and `UserPromptSubmit` hooks
+2. **`.codex/hooks/config/hooks-config.json`** — Enable/disable individual hooks and logging
 
-#### config.toml (agent-turn-complete hook)
-
-```toml
-notify = ["python3", ".codex/hooks/scripts/hooks.py"]
-```
-
-#### hooks.json (SessionStart + Stop hooks)
+#### hooks.json
 
 ```json
 {
@@ -96,6 +84,14 @@ notify = ["python3", ".codex/hooks/scripts/hooks.py"]
         "statusMessage": "Running session stop hook...",
         "timeout": 10
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "shell",
+        "command": "python3 .codex/hooks/scripts/hooks.py --hook UserPromptSubmit",
+        "statusMessage": "Running user prompt submit hook...",
+        "timeout": 10
+      }
     ]
   }
 }
@@ -108,17 +104,17 @@ notify = ["python3", ".codex/hooks/scripts/hooks.py"]
 Edit `.codex/hooks/config/hooks-config.json`:
 ```json
 {
-  "disableAgentTurnCompleteHook": false,
   "disableSessionStartHook": false,
   "disableStopHook": false,
+  "disableUserPromptSubmitHook": false,
   "disableLogging": true
 }
 ```
 
 **Configuration Options:**
-- `disableAgentTurnCompleteHook`: Set to `true` to disable the agent-turn-complete sound
 - `disableSessionStartHook`: Set to `true` to disable the session start context injection and sound
 - `disableStopHook`: Set to `true` to disable the session stop sound
+- `disableUserPromptSubmitHook`: Set to `true` to disable the user prompt submit sound
 - `disableLogging`: Set to `true` to disable logging hook events to `.codex/hooks/logs/hooks-log.jsonl`
 
 ### Configuration Fallback
@@ -136,9 +132,9 @@ Create or edit `.codex/hooks/config/hooks-config.local.json` for personal prefer
 
 ```json
 {
-  "disableAgentTurnCompleteHook": true,
   "disableSessionStartHook": false,
   "disableStopHook": true,
+  "disableUserPromptSubmitHook": false,
   "disableLogging": true
 }
 ```

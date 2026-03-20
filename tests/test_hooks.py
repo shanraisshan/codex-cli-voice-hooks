@@ -2,7 +2,7 @@
 """
 Tests for Codex CLI Hook Handler
 =================================
-Tests all 3 hooks: agent-turn-complete, SessionStart, and Stop.
+Tests all 3 hooks: SessionStart, Stop, and UserPromptSubmit.
 Run with: python3 -m pytest tests/test_hooks.py -v
 """
 
@@ -20,30 +20,30 @@ import hooks
 
 
 class TestParseArgs(unittest.TestCase):
-    """Test argument parsing for both calling conventions."""
+    """Test argument parsing."""
 
     def test_empty_args(self):
         event_type, input_data = hooks.parse_args([])
         self.assertIsNone(event_type)
         self.assertIsNone(input_data)
 
-    def test_agent_turn_complete_hook_json_arg(self):
-        """agent-turn-complete hook: JSON as CLI argument."""
-        event_type, input_data = hooks.parse_args(['{"type":"agent-turn-complete"}'])
-        self.assertEqual(event_type, "agent-turn-complete")
-        self.assertEqual(input_data, {"type": "agent-turn-complete"})
-
     def test_session_start_hook_flag(self):
-        """New hooks.json: --hook SessionStart."""
+        """hooks.json: --hook SessionStart."""
         event_type, input_data = hooks.parse_args(["--hook", "SessionStart"])
         self.assertEqual(event_type, "SessionStart")
         self.assertEqual(input_data, {"type": "SessionStart"})
 
     def test_stop_hook_flag(self):
-        """New hooks.json: --hook Stop."""
+        """hooks.json: --hook Stop."""
         event_type, input_data = hooks.parse_args(["--hook", "Stop"])
         self.assertEqual(event_type, "Stop")
         self.assertEqual(input_data, {"type": "Stop"})
+
+    def test_UserPromptSubmit_hook_flag(self):
+        """hooks.json: --hook UserPromptSubmit."""
+        event_type, input_data = hooks.parse_args(["--hook", "UserPromptSubmit"])
+        self.assertEqual(event_type, "UserPromptSubmit")
+        self.assertEqual(input_data, {"type": "UserPromptSubmit"})
 
     def test_hook_flag_missing_value(self):
         """--hook without a value should return None."""
@@ -51,9 +51,9 @@ class TestParseArgs(unittest.TestCase):
         self.assertIsNone(event_type)
         self.assertIsNone(input_data)
 
-    def test_invalid_json(self):
-        """Invalid JSON should return None gracefully."""
-        event_type, input_data = hooks.parse_args(["not-json"])
+    def test_invalid_arg(self):
+        """Invalid argument should return None gracefully."""
+        event_type, input_data = hooks.parse_args(["not-a-hook-flag"])
         self.assertIsNone(event_type)
         self.assertIsNone(input_data)
 
@@ -61,14 +61,14 @@ class TestParseArgs(unittest.TestCase):
 class TestHookSoundMap(unittest.TestCase):
     """Test that all hook events have sound mappings."""
 
-    def test_agent_turn_complete_mapping(self):
-        self.assertIn("agent-turn-complete", hooks.HOOK_SOUND_MAP)
-
     def test_session_start_mapping(self):
         self.assertIn("SessionStart", hooks.HOOK_SOUND_MAP)
 
     def test_session_stop_mapping(self):
         self.assertIn("Stop", hooks.HOOK_SOUND_MAP)
+
+    def test_UserPromptSubmit_mapping(self):
+        self.assertIn("UserPromptSubmit", hooks.HOOK_SOUND_MAP)
 
     def test_unknown_event_no_mapping(self):
         self.assertNotIn("unknown-event", hooks.HOOK_SOUND_MAP)
@@ -77,14 +77,14 @@ class TestHookSoundMap(unittest.TestCase):
 class TestHookConfigMap(unittest.TestCase):
     """Test that all hook events have config key mappings."""
 
-    def test_agent_turn_complete_config_key(self):
-        self.assertEqual(hooks.HOOK_CONFIG_MAP["agent-turn-complete"], "disableAgentTurnCompleteHook")
-
     def test_session_start_config_key(self):
         self.assertEqual(hooks.HOOK_CONFIG_MAP["SessionStart"], "disableSessionStartHook")
 
     def test_session_stop_config_key(self):
         self.assertEqual(hooks.HOOK_CONFIG_MAP["Stop"], "disableStopHook")
+
+    def test_UserPromptSubmit_config_key(self):
+        self.assertEqual(hooks.HOOK_CONFIG_MAP["UserPromptSubmit"], "disableUserPromptSubmitHook")
 
 
 class TestIsHookDisabled(unittest.TestCase):
@@ -99,14 +99,9 @@ class TestIsHookDisabled(unittest.TestCase):
     @patch("hooks.load_config")
     def test_hook_enabled_by_default(self, mock_load):
         mock_load.return_value = (None, None)
-        self.assertFalse(hooks.is_hook_disabled("agent-turn-complete"))
         self.assertFalse(hooks.is_hook_disabled("SessionStart"))
         self.assertFalse(hooks.is_hook_disabled("Stop"))
-
-    @patch("hooks.load_config")
-    def test_agent_turn_complete_hook_disabled_in_default_config(self, mock_load):
-        mock_load.return_value = (None, {"disableAgentTurnCompleteHook": True})
-        self.assertTrue(hooks.is_hook_disabled("agent-turn-complete"))
+        self.assertFalse(hooks.is_hook_disabled("UserPromptSubmit"))
 
     @patch("hooks.load_config")
     def test_session_start_disabled_in_default_config(self, mock_load):
@@ -119,12 +114,17 @@ class TestIsHookDisabled(unittest.TestCase):
         self.assertTrue(hooks.is_hook_disabled("Stop"))
 
     @patch("hooks.load_config")
+    def test_UserPromptSubmit_disabled_in_default_config(self, mock_load):
+        mock_load.return_value = (None, {"disableUserPromptSubmitHook": True})
+        self.assertTrue(hooks.is_hook_disabled("UserPromptSubmit"))
+
+    @patch("hooks.load_config")
     def test_local_config_overrides_default(self, mock_load):
         mock_load.return_value = (
-            {"disableAgentTurnCompleteHook": True},
-            {"disableAgentTurnCompleteHook": False},
+            {"disableSessionStartHook": True},
+            {"disableSessionStartHook": False},
         )
-        self.assertTrue(hooks.is_hook_disabled("agent-turn-complete"))
+        self.assertTrue(hooks.is_hook_disabled("SessionStart"))
 
     @patch("hooks.load_config")
     def test_local_config_enables_when_default_disables(self, mock_load):
@@ -183,7 +183,7 @@ class TestPlaySound(unittest.TestCase):
 
     @patch("hooks.get_audio_player", return_value=None)
     def test_no_audio_player(self, _):
-        self.assertFalse(hooks.play_sound("agent-turn-complete"))
+        self.assertFalse(hooks.play_sound("SessionStart"))
 
 
 class TestLogHookData(unittest.TestCase):
@@ -220,16 +220,6 @@ class TestMainIntegration(unittest.TestCase):
     @patch("hooks.play_sound", return_value=True)
     @patch("hooks.is_hook_disabled", return_value=False)
     @patch("hooks.log_hook_data")
-    def test_agent_turn_complete_hook_plays_sound(self, mock_log, mock_disabled, mock_play):
-        with patch("sys.argv", ["hooks.py", '{"type":"agent-turn-complete"}']):
-            with self.assertRaises(SystemExit) as ctx:
-                hooks.main()
-            self.assertEqual(ctx.exception.code, 0)
-            mock_play.assert_called_once_with("agent-turn-complete")
-
-    @patch("hooks.play_sound", return_value=True)
-    @patch("hooks.is_hook_disabled", return_value=False)
-    @patch("hooks.log_hook_data")
     @patch("hooks.get_session_context", return_value="Date: 2026-03-17\nGit branch: main")
     def test_session_start_outputs_context_and_plays_sound(
         self, mock_context, mock_log, mock_disabled, mock_play
@@ -250,6 +240,16 @@ class TestMainIntegration(unittest.TestCase):
                 hooks.main()
             self.assertEqual(ctx.exception.code, 0)
             mock_play.assert_called_once_with("Stop")
+
+    @patch("hooks.play_sound", return_value=True)
+    @patch("hooks.is_hook_disabled", return_value=False)
+    @patch("hooks.log_hook_data")
+    def test_UserPromptSubmit_plays_sound(self, mock_log, mock_disabled, mock_play):
+        with patch("sys.argv", ["hooks.py", "--hook", "UserPromptSubmit"]):
+            with self.assertRaises(SystemExit) as ctx:
+                hooks.main()
+            self.assertEqual(ctx.exception.code, 0)
+            mock_play.assert_called_once_with("UserPromptSubmit")
 
     @patch("hooks.play_sound")
     @patch("hooks.is_hook_disabled", return_value=True)

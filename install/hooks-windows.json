@@ -24,6 +24,18 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .codex/hooks/scripts/hooks.py --hook UserPromptSubmit",
+            "timeout": 10,
+            "statusMessage": "Running user prompt submit hook"
+          }
+        ]
+      }
     ]
   }
 }

@@ -27,10 +27,3 @@ cp temp-hooks/install/hooks-mac.json .codex/hooks.json
 rm -rf temp-hooks
 ```
 
-### Step 2: Copy config.toml into your project
-
-1. If you don't have a `.codex/config.toml` file in your project, create one: `touch .codex/config.toml`
-2. Open [`install/config-mac.toml`](config-mac.toml) and copy the `notify` line into your `.codex/config.toml`
-
-> **Why separate config files per platform?**
-> - Python command: `python3` (macOS/Linux) vs `python` (Windows)

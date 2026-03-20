@@ -1,5 +1,5 @@
 # Codex CLI Hooks
-[![Hooks](https://img.shields.io/badge/supports-3%20hooks-white?style=flat&labelColor=555)](.codex/hooks/HOOKS-README.md) [![Version](https://img.shields.io/badge/updated%20with%20Codex%20CLI-v0.115.0%20(Mar%2017%2C%202026%206%3A30%20PM%20PKT)-white?style=flat&labelColor=555)](https://github.com/openai/codex/releases) <img src="!/beta.svg" alt="Beta" height="20">
+[![Hooks](https://img.shields.io/badge/supports-3%20hooks-white?style=flat&labelColor=555)](.codex/hooks/HOOKS-README.md) [![Version](https://img.shields.io/badge/updated%20with%20Codex%20CLI-v0.116.0%20(Mar%2019%2C%202026)-white?style=flat&labelColor=555)](https://github.com/openai/codex/releases) <img src="!/beta.svg" alt="Beta" height="20">
 
 <p align="center">
   <img src="!/codex-speaking.svg" alt="Codex CLI mascot speaking" width="176" height="158">
@@ -24,15 +24,15 @@
 codex -c features.codex_hooks=true
 ```
 
-**Step 2.** Send a prompt (e.g., `Hi`) — you'll hear a sound on session start, agent response, and session stop.
+**Step 2.** Send a prompt (e.g., `Hi`) — you'll hear a sound on session start, prompt submit, and session stop.
 
 ## Changelog
 new hook addition changelogs only
 
 | Date | Hooks | Changes | Codex CLI Version | Demo |
 |------|:-----:|---------|:-----------------:|:----:|
-| Mar 11, 2026 | 3 | Added `SessionStart` and `Stop` | [v0.115.0](https://github.com/openai/codex/releases) | |
-| Jun 30, 2025 | 1 | Initial release: `agent-turn-complete` | [v0.2.0](https://github.com/openai/codex/releases) | |
+| Mar 20, 2026 | 3 | Added `UserPromptSubmit` | [v0.116.0](https://github.com/openai/codex/releases) | |
+| Mar 11, 2026 | 2 | Added `SessionStart` and `Stop` | [v0.115.0](https://github.com/openai/codex/releases) | |
 
 ## Links
 
