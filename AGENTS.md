@@ -6,7 +6,7 @@ This file provides guidance to Codex CLI when working with code in this reposito
 
 A drop-in hooks pack for **Codex CLI**. A single Python handler (`.codex/hooks/scripts/hooks.py`) plays an ElevenLabs "Adam" voice clip on each Codex hook event and injects context at session start. Codex CLI discovers it via `.codex/hooks.json`. Distributed as installer bundles for Mac/Linux/Windows under `install/`.
 
-The hooks engine is **stable** as of Codex CLI v0.123.0. Enable it with `codex -c features.codex_hooks=true`.
+The hooks engine is **stable** as of Codex CLI v0.123.0 — no feature flag required, just run `codex`.
 
 ## Supported hooks (6 total)
 
@@ -28,8 +28,8 @@ python3 -m unittest tests.test_hooks -v
 # Manually invoke a hook
 python3 .codex/hooks/scripts/hooks.py --hook SessionStart
 
-# Start Codex CLI with hooks enabled
-codex -c features.codex_hooks=true
+# Start Codex CLI (hooks load automatically as of v0.123.0)
+codex
 ```
 
 ## Git Commit Rules
