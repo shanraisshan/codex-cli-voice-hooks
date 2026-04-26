@@ -25,6 +25,18 @@
         ]
       }
     ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .codex/hooks/scripts/hooks.py --hook PermissionRequest",
+            "timeout": 10,
+            "statusMessage": "Running permission request hook"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "hooks": [

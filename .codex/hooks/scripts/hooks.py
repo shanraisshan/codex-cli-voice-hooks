@@ -3,12 +3,13 @@
 Codex CLI Hook Handler
 =============================================
 This script handles hooks from Codex CLI and plays sounds.
-Codex CLI supports 5 hooks:
+Codex CLI supports 6 hooks:
   1. SessionStart - via hooks.json (v0.114.0+)
   2. PreToolUse - via hooks.json (v0.117.0+)
-  3. PostToolUse - via hooks.json (v0.117.0+)
-  4. Stop - via hooks.json (v0.114.0+)
-  5. UserPromptSubmit - via hooks.json (v0.116.0+)
+  3. PermissionRequest - via hooks.json (v0.122.0+)
+  4. PostToolUse - via hooks.json (v0.117.0+)
+  5. Stop - via hooks.json (v0.114.0+)
+  6. UserPromptSubmit - via hooks.json (v0.116.0+)
 
 Input:
   - All hooks use --hook <hook-name> flag via hooks.json
@@ -32,6 +33,7 @@ except ImportError:
 HOOK_SOUND_MAP = {
     "SessionStart": "SessionStart",
     "PreToolUse": "PreToolUse",
+    "PermissionRequest": "PermissionRequest",
     "PostToolUse": "PostToolUse",
     "Stop": "Stop",
     "UserPromptSubmit": "UserPromptSubmit",
@@ -41,6 +43,7 @@ HOOK_SOUND_MAP = {
 HOOK_CONFIG_MAP = {
     "SessionStart": "disableSessionStartHook",
     "PreToolUse": "disablePreToolUseHook",
+    "PermissionRequest": "disablePermissionRequestHook",
     "PostToolUse": "disablePostToolUseHook",
     "Stop": "disableStopHook",
     "UserPromptSubmit": "disableUserPromptSubmitHook",
@@ -311,12 +314,13 @@ def main():
     """
     Main program - runs when Codex CLI triggers a hook.
 
-    Supports 5 hooks:
+    Supports 6 hooks:
     1. SessionStart (hooks.json): Outputs context to stdout + plays sound
     2. PreToolUse (hooks.json): Plays sound before a tool executes
-    3. PostToolUse (hooks.json): Plays sound after a tool completes
-    4. Stop (hooks.json): Plays sound on session end
-    5. UserPromptSubmit (hooks.json): Plays sound when user submits a prompt
+    3. PermissionRequest (hooks.json): Plays sound when approval is requested
+    4. PostToolUse (hooks.json): Plays sound after a tool completes
+    5. Stop (hooks.json): Plays sound on session end
+    6. UserPromptSubmit (hooks.json): Plays sound when user submits a prompt
     """
     try:
         event_type, input_data = parse_args(sys.argv[1:])

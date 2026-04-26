@@ -9,6 +9,10 @@
   <img src="!/repo-description.svg" alt="Human sounds on session start, stop, and agent turn complete, context injection" height="56">
 </p>
 
+<p align="center">
+  <img src="!/hooks-tags.svg" alt="Supported hooks: SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, PostToolUse, Stop" height="32">
+</p>
+
 ## Installation
 
 <p>
