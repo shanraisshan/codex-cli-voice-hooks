@@ -14,14 +14,6 @@ Codex CLI provides **6 hooks** via hooks.json:
 | 5 | `Stop` | `stop` | `hooks.json` | Runs when the session ends — plays sound |
 | 6 | `UserPromptSubmit` | `UserPromptSubmit` | `hooks.json` | Runs when the user submits a prompt — plays sound |
 
-> Hooks 1 and 5 require **Codex CLI v0.114.0+** with the hooks engine enabled.
-> Hooks 2 and 4 require **Codex CLI v0.117.0+** with the hooks engine enabled.
-> Hook 6 requires **Codex CLI v0.116.0+** with the hooks engine enabled.
-> Hook 3 requires **Codex CLI v0.122.0+** with the hooks engine enabled:
-> ```bash
-> codex -c features.codex_hooks=true
-> ```
-
 ### How Hooks Are Called
 
 All hooks (hooks.json) are called with `--hook` flag:
