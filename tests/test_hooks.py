@@ -2,8 +2,8 @@
 """
 Tests for Codex CLI Hook Handler
 =================================
-Tests all 5 hooks: SessionStart, PreToolUse, PostToolUse, Stop, and UserPromptSubmit.
-Run with: python3 -m pytest tests/test_hooks.py -v
+Tests all 6 hooks: SessionStart, PreToolUse, PermissionRequest, PostToolUse, Stop, and UserPromptSubmit.
+Run with: python3 -m unittest tests.test_hooks -v
 """
 
 import sys
