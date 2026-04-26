@@ -21,8 +21,8 @@ python3 -m unittest tests.test_hooks.TestParseArgs.test_session_start_hook_flag 
 python3 .codex/hooks/scripts/hooks.py --hook SessionStart
 echo '{"type":"PreToolUse","tool_name":"Bash"}' | python3 .codex/hooks/scripts/hooks.py --hook PreToolUse
 
-# Start Codex CLI with hooks enabled
-codex -c features.codex_hooks=true
+# Start Codex CLI (hooks load automatically as of v0.123.0)
+codex
 ```
 
 There is no build step, lint config, or package manager — the project is plain Python 3 plus JSON/SVG assets.
@@ -72,5 +72,5 @@ The only exception is when the user explicitly says "single commit", "one commit
 ## Other repo conventions
 
 - The README, `HOOKS-README.md`, and `tests/test_hooks.py` docstrings all hardcode the hook count. When you add or remove a hook, update all of them in lockstep — code is source of truth.
-- The hooks engine is **stable** as of Codex CLI v0.123.0. The `--config features.codex_hooks=true` flag is still required to enable it.
+- The hooks engine is **stable** as of Codex CLI v0.123.0 — no feature flag required. (Older versions needed `-c features.codex_hooks=true`; if you see that flag in old docs or scripts, it can be dropped.)
 - The repo intentionally has no CI, no lockfile, no formatter config. Don't add them speculatively.
