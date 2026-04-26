@@ -23,9 +23,9 @@
 
 ![How to Use](!/how-to-use.svg)
 
-**Step 1.** Start Codex CLI with the hooks engine enabled:
+**Step 1.** Start Codex CLI:
 ```bash
-codex -c features.codex_hooks=true
+codex
 ```
 
 **Step 2.** Send a prompt (e.g., `Hi`) — you'll hear a sound on session start, tool use, prompt submit, and session stop.
@@ -75,10 +75,6 @@ new hook addition changelogs only
 </td>
 </tr>
 </table>
-
-<p align="center">
-  <img src="!/codex-jumping.svg" alt="section divider" width="60" height="50">
-</p>
 
 ## <img src="!/tags/sponsor-heart.svg" width="22" height="22" align="center"> Sponsor My Work
 
