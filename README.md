@@ -1,5 +1,5 @@
 # Codex CLI Hooks
-[![Hooks](https://img.shields.io/badge/supports-6%20hooks-white?style=flat&labelColor=555)](.codex/hooks/HOOKS-README.md) [![Version](https://img.shields.io/badge/updated%20with%20Codex%20CLI-v0.123.0%20(Apr%2026%2C%202026%204%3A42%20PM%20PKT)-white?style=flat&labelColor=555)](https://github.com/openai/codex/releases) [![Stars](https://img.shields.io/github/stars/shanraisshan/codex-cli-hooks?style=flat&label=%E2%98%85&labelColor=555&color=white)](https://github.com/shanraisshan/codex-cli-hooks/stargazers)
+[![Hooks](https://img.shields.io/badge/supports-8%20hooks-white?style=flat&labelColor=555)](.codex/hooks/HOOKS-README.md) [![Version](https://img.shields.io/badge/updated%20with%20Codex%20CLI-v0.130.0%20(May%2016%2C%202026%204%3A45%20AM%20PKT)-white?style=flat&labelColor=555)](https://github.com/openai/codex/releases) [![Stars](https://img.shields.io/github/stars/shanraisshan/codex-cli-hooks?style=flat&label=%E2%98%85&labelColor=555&color=white)](https://github.com/shanraisshan/codex-cli-hooks/stargazers)
 
 <p align="center">
   <img src="!/codex-speaking.svg" alt="Codex CLI mascot speaking" width="176" height="158">
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="!/hooks-tags.svg" alt="Supported hooks: SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, PostToolUse, Stop" height="32">
+  <img src="!/hooks-tags.svg" alt="Supported hooks: SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, PostToolUse, Stop, PreCompact, PostCompact" height="32">
 </p>
 
 ## Installation
@@ -28,13 +28,24 @@
 codex
 ```
 
-**Step 2.** Send a prompt (e.g., `Hi`) — you'll hear a sound on session start, tool use, prompt submit, and session stop.
+**Step 2.** First run only — trust each hook. run `/hooks`
+
+<p>
+  <img src="!/codex-cli/hook-1.png" alt="Codex CLI showing hooks need review" width="50%" />
+</p>
+
+<p>
+  <img src="!/codex-cli/hook-2.png" alt="Codex CLI /hooks trust prompt" width="50%" />
+</p>
+
+**Step 3.** Send a prompt (e.g., `Hi`) — you'll hear a sound on session start, tool use, prompt submit, and session stop.
 
 ## Changelog
 new hook addition changelogs only
 
 | Date | Hooks | Changes | Codex CLI Version | Demo |
 |------|:-----:|---------|:-----------------:|:----:|
+| May 7, 2026 | 8 | Added `PreCompact` and `PostCompact` | [v0.129.0](https://github.com/openai/codex/releases) | |
 | Apr 26, 2026 | 6 | Added `PermissionRequest` | [v0.122.0](https://github.com/openai/codex/releases) | |
 | Mar 26, 2026 | 5 | Added `PreToolUse` and `PostToolUse` | [v0.117.0](https://github.com/openai/codex/releases) | |
 | Mar 20, 2026 | 3 | Added `UserPromptSubmit` | [v0.116.0](https://github.com/openai/codex/releases) | |
