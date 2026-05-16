@@ -3,7 +3,7 @@ Contains all the details, scripts, and instructions for the Codex CLI hooks.
 
 ## Hook Events Overview
 
-Codex CLI provides **6 hooks** via hooks.json:
+Codex CLI provides **8 hooks** via hooks.json:
 
 | # | Hook | Event Type | Config File | Description |
 |:-:|------|------------|-------------|-------------|
@@ -13,6 +13,8 @@ Codex CLI provides **6 hooks** via hooks.json:
 | 4 | `PostToolUse` | `PostToolUse` | `hooks.json` | Runs after a tool completes — plays sound |
 | 5 | `Stop` | `stop` | `hooks.json` | Runs when the session ends — plays sound |
 | 6 | `UserPromptSubmit` | `UserPromptSubmit` | `hooks.json` | Runs when the user submits a prompt — plays sound |
+| 7 | `PreCompact` | `PreCompact` | `hooks.json` | Runs before context compaction — plays sound |
+| 8 | `PostCompact` | `PostCompact` | `hooks.json` | Runs after context compaction — plays sound |
 
 ### How Hooks Are Called
 
@@ -24,6 +26,8 @@ python3 .codex/hooks/scripts/hooks.py --hook PermissionRequest
 python3 .codex/hooks/scripts/hooks.py --hook PostToolUse
 python3 .codex/hooks/scripts/hooks.py --hook Stop
 python3 .codex/hooks/scripts/hooks.py --hook UserPromptSubmit
+python3 .codex/hooks/scripts/hooks.py --hook PreCompact
+python3 .codex/hooks/scripts/hooks.py --hook PostCompact
 ```
 
 ### SessionStart Context Injection
@@ -61,7 +65,7 @@ The hook script automatically detects and uses the appropriate audio player for 
 
 There are **two** configuration files:
 
-1. **`.codex/hooks.json`** — Registers `SessionStart`, `PreToolUse`, `PermissionRequest`, `PostToolUse`, `Stop`, and `UserPromptSubmit` hooks
+1. **`.codex/hooks.json`** — Registers `SessionStart`, `PreToolUse`, `PermissionRequest`, `PostToolUse`, `Stop`, `UserPromptSubmit`, `PreCompact`, and `PostCompact` hooks
 2. **`.codex/hooks/config/hooks-config.json`** — Enable/disable individual hooks and logging
 
 #### hooks.json
@@ -116,6 +120,22 @@ There are **two** configuration files:
         "statusMessage": "Running user prompt submit hook...",
         "timeout": 10
       }
+    ],
+    "PreCompact": [
+      {
+        "type": "shell",
+        "command": "python3 .codex/hooks/scripts/hooks.py --hook PreCompact",
+        "statusMessage": "Running pre-compact hook...",
+        "timeout": 10
+      }
+    ],
+    "PostCompact": [
+      {
+        "type": "shell",
+        "command": "python3 .codex/hooks/scripts/hooks.py --hook PostCompact",
+        "statusMessage": "Running post-compact hook...",
+        "timeout": 10
+      }
     ]
   }
 }
@@ -134,6 +154,8 @@ Edit `.codex/hooks/config/hooks-config.json`:
   "disablePostToolUseHook": false,
   "disableStopHook": false,
   "disableUserPromptSubmitHook": false,
+  "disablePreCompactHook": false,
+  "disablePostCompactHook": false,
   "disableLogging": true
 }
 ```
@@ -145,6 +167,8 @@ Edit `.codex/hooks/config/hooks-config.json`:
 - `disablePostToolUseHook`: Set to `true` to disable the post-tool-use sound
 - `disableStopHook`: Set to `true` to disable the session stop sound
 - `disableUserPromptSubmitHook`: Set to `true` to disable the user prompt submit sound
+- `disablePreCompactHook`: Set to `true` to disable the pre-compact sound
+- `disablePostCompactHook`: Set to `true` to disable the post-compact sound
 - `disableLogging`: Set to `true` to disable logging hook events to `.codex/hooks/logs/hooks-log.jsonl`
 
 ### Configuration Fallback
@@ -168,6 +192,8 @@ Create or edit `.codex/hooks/config/hooks-config.local.json` for personal prefer
   "disablePostToolUseHook": false,
   "disableStopHook": true,
   "disableUserPromptSubmitHook": false,
+  "disablePreCompactHook": false,
+  "disablePostCompactHook": false,
   "disableLogging": true
 }
 ```
