@@ -40,7 +40,7 @@ To add a new hook, you must update **all** of these in lockstep, or it will sile
 3. The hook entry in `.codex/hooks.json` **and** all three `install/hooks-{mac,linux,windows}.json` (they are intentional duplicates — `.codex/hooks.json` is the live config, `install/*` are templates the user copies during install). Windows uses `python` (not `python3`); Mac/Linux use `python3`.
 4. Sound files at `.codex/hooks/sounds/<EventName>/<EventName>.{mp3,wav}` — folder and filename must match the event name **exactly** (CamelCase). Generate both formats: macOS/Linux play `.mp3` via `afplay`/`paplay`; Windows plays `.wav` via `winsound`.
 
-**Currently supported events** (Codex CLI 0.122.0+): `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PermissionRequest`, `PostToolUse`, `Stop`. The full Codex hook surface is only these six — much narrower than Claude Code's. When the user asks "are there more hooks", check the official Codex changelog at developers.openai.com/codex/changelog before claiming a hook exists.
+**Currently supported events** (Codex CLI 0.130.0+): `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PermissionRequest`, `PostToolUse`, `Stop`, `PreCompact`, `PostCompact`. The full Codex hook surface is these eight — still narrower than Claude Code's. When the user asks "are there more hooks", check the official Codex changelog at developers.openai.com/codex/changelog before claiming a hook exists.
 
 **Special-case event:** `SessionStart` writes context (date, git branch, cwd) to **stdout**, which Codex injects into the model's context window. Other events only play sound and exit. Don't add stdout output to other events unless you intend it to land in the prompt.
 
