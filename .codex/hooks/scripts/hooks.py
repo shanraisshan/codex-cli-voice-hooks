@@ -3,13 +3,15 @@
 Codex CLI Hook Handler
 =============================================
 This script handles hooks from Codex CLI and plays sounds.
-Codex CLI supports 6 hooks:
+Codex CLI supports 8 hooks:
   1. SessionStart - via hooks.json (v0.114.0+)
   2. PreToolUse - via hooks.json (v0.117.0+)
   3. PermissionRequest - via hooks.json (v0.122.0+)
   4. PostToolUse - via hooks.json (v0.117.0+)
   5. Stop - via hooks.json (v0.114.0+)
   6. UserPromptSubmit - via hooks.json (v0.116.0+)
+  7. PreCompact - via hooks.json (v0.130.0+)
+  8. PostCompact - via hooks.json (v0.130.0+)
 
 Input:
   - All hooks use --hook <hook-name> flag via hooks.json
@@ -37,6 +39,8 @@ HOOK_SOUND_MAP = {
     "PostToolUse": "PostToolUse",
     "Stop": "Stop",
     "UserPromptSubmit": "UserPromptSubmit",
+    "PreCompact": "PreCompact",
+    "PostCompact": "PostCompact",
 }
 
 # ===== HOOK EVENT TO CONFIG KEY MAPPING =====
@@ -47,6 +51,8 @@ HOOK_CONFIG_MAP = {
     "PostToolUse": "disablePostToolUseHook",
     "Stop": "disableStopHook",
     "UserPromptSubmit": "disableUserPromptSubmitHook",
+    "PreCompact": "disablePreCompactHook",
+    "PostCompact": "disablePostCompactHook",
 }
 
 
@@ -314,13 +320,15 @@ def main():
     """
     Main program - runs when Codex CLI triggers a hook.
 
-    Supports 6 hooks:
+    Supports 8 hooks:
     1. SessionStart (hooks.json): Outputs context to stdout + plays sound
     2. PreToolUse (hooks.json): Plays sound before a tool executes
     3. PermissionRequest (hooks.json): Plays sound when approval is requested
     4. PostToolUse (hooks.json): Plays sound after a tool completes
     5. Stop (hooks.json): Plays sound on session end
     6. UserPromptSubmit (hooks.json): Plays sound when user submits a prompt
+    7. PreCompact (hooks.json): Plays sound before context compaction
+    8. PostCompact (hooks.json): Plays sound after context compaction
     """
     try:
         event_type, input_data = parse_args(sys.argv[1:])
