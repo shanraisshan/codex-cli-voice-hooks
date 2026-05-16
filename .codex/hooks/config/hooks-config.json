@@ -5,5 +5,7 @@
   "disablePostToolUseHook": false,
   "disableStopHook": false,
   "disableUserPromptSubmitHook": false,
+  "disablePreCompactHook": false,
+  "disablePostCompactHook": false,
   "disableLogging": true
 }
