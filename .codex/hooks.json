@@ -72,6 +72,30 @@
           }
         ]
       }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ./.codex/hooks/scripts/hooks.py --hook PreCompact",
+            "timeout": 10,
+            "statusMessage": "Running pre-compact hook"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ./.codex/hooks/scripts/hooks.py --hook PostCompact",
+            "timeout": 10,
+            "statusMessage": "Running post-compact hook"
+          }
+        ]
+      }
     ]
   }
 }
